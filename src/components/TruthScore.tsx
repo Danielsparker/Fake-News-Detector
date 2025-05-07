@@ -27,19 +27,34 @@ export function TruthScore({ score, truthLevel }: TruthScoreProps) {
     }
   };
 
+  const getTextColor = () => {
+    switch (truthLevel) {
+      case "True":
+        return "text-truth-true";
+      case "Likely True":
+        return "text-truth-likelyTrue";
+      case "Misleading":
+        return "text-truth-misleading";
+      case "Fake":
+        return "text-truth-fake";
+      default:
+        return "text-gray-400";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Truth Score</h3>
-        <div className={cn("px-3 py-1 rounded-full text-white text-sm font-medium", getBadgeColor())}>
+        <div className={cn("px-3 py-1 rounded-full text-white text-sm font-medium shadow-sm", getBadgeColor())}>
           {truthLevel}
         </div>
       </div>
       
       <div className="relative pt-1">
-        <div className="gradient-truth-score">
+        <div className="gradient-truth-score h-3">
           <div
-            className="truth-meter-marker"
+            className="truth-meter-marker shadow-lg"
             style={{ 
               left: markerPosition,
               backgroundColor: truthLevel === "True" ? "#4ade80" : 
@@ -48,9 +63,9 @@ export function TruthScore({ score, truthLevel }: TruthScoreProps) {
             }}
           />
         </div>
-        <div className="flex justify-between text-xs mt-2">
+        <div className="flex justify-between text-xs mt-3">
           <span>0</span>
-          <span>Truth Score: {score}</span>
+          <span className={cn("font-medium", getTextColor())}>Score: {score}/100</span>
           <span>100</span>
         </div>
       </div>

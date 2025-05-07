@@ -4,12 +4,12 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   return (
-    <nav className="border-b py-4">
+    <nav className="border-b py-4 sticky top-0 bg-background/95 backdrop-blur-sm z-10">
       <div className="container flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-violet-500">
-              Checkit.ai
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              Fakebuster
             </span>
           </Link>
           
