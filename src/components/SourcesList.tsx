@@ -1,6 +1,7 @@
 
 import { Source } from "@/types";
 import { CheckCheck, ExternalLink, X } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface SourcesListProps {
   sources: Source[];
@@ -38,14 +39,21 @@ export function SourcesList({ sources }: SourcesListProps) {
               )}
             </div>
             
-            <a 
-              href={source.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center mt-3 text-xs font-medium text-primary hover:underline"
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 text-xs"
+              asChild
             >
-              View Source <ExternalLink className="ml-1 h-3 w-3" />
-            </a>
+              <a 
+                href={source.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center"
+              >
+                View Source <ExternalLink className="ml-1 h-3 w-3" />
+              </a>
+            </Button>
           </div>
         ))}
       </div>

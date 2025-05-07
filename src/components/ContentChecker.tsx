@@ -7,13 +7,15 @@ import { TruthScore } from "./TruthScore";
 import { SourcesList } from "./SourcesList";
 import { analyzeContent, detectContentType, saveToHistory } from "@/utils/ai";
 import { CheckedContent } from "@/types";
-import { FileSearch, Loader2, ShieldCheck } from "lucide-react";
+import { AlertCircle, FileSearch, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 export function ContentChecker() {
   const [content, setContent] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [results, setResults] = useState<CheckedContent | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const handleCheck = async () => {
     if (!content.trim()) {
@@ -22,6 +24,7 @@ export function ContentChecker() {
     }
     
     setIsChecking(true);
+    setError(null);
     try {
       const contentType = detectContentType(content);
       const checkedContent = await analyzeContent(content, contentType);
@@ -30,6 +33,7 @@ export function ContentChecker() {
       toast.success("Analysis complete!");
     } catch (error) {
       console.error("Error checking content:", error);
+      setError("Unable to fetch results. Please try again later.");
       toast.error("Failed to analyze content. Please try again.");
     } finally {
       setIsChecking(false);
@@ -88,7 +92,23 @@ export function ContentChecker() {
         </CardFooter>
       </Card>
       
-      {results && (
+      {isChecking && (
+        <div className="flex flex-col items-center justify-center py-10">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+          <p className="text-lg font-medium">Analyzing content...</p>
+          <p className="text-muted-foreground">This may take a moment</p>
+        </div>
+      )}
+      
+      {error && !isChecking && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {results && !isChecking && !error && (
         <div className="space-y-6 animate-fade-in">
           <Card className="border-2 shadow-md">
             <CardHeader>
