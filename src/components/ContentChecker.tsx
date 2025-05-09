@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,29 @@ export function ContentChecker() {
   const [isChecking, setIsChecking] = useState(false);
   const [results, setResults] = useState<CheckedContent | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Listen for uploaded news content
+    const handleNewsContentUploaded = () => {
+      const uploadedContent = localStorage.getItem("uploadedNewsContent");
+      if (uploadedContent) {
+        setContent(uploadedContent);
+        localStorage.removeItem("uploadedNewsContent");
+        toast.info("News content loaded from file", {
+          description: "Click 'Check Facts' to analyze"
+        });
+      }
+    };
+    
+    window.addEventListener("newsContentUploaded", handleNewsContentUploaded);
+    
+    // Check if there's content in localStorage on component mount
+    handleNewsContentUploaded();
+    
+    return () => {
+      window.removeEventListener("newsContentUploaded", handleNewsContentUploaded);
+    };
+  }, []);
   
   const handleCheck = async () => {
     if (!content.trim()) {

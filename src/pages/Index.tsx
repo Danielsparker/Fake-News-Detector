@@ -1,6 +1,7 @@
 
 import { ContentChecker } from "@/components/ContentChecker";
 import { Navbar } from "@/components/Navbar";
+import { FileUploadButton } from "@/components/FileUploadButton";
 
 const Index = () => {
   return (
@@ -28,6 +29,7 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      <FileUploadButton />
     </div>
   );
 };
