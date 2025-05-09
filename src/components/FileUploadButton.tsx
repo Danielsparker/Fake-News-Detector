@@ -63,12 +63,13 @@ export function FileUploadButton() {
     <div className="fixed bottom-6 right-6 z-10">
       <Sheet>
         <SheetTrigger asChild>
-          <Button 
-            className="rounded-full h-14 w-14 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg hover:shadow-xl transition-all"
-            size="icon"
+          <div 
+            className="w-56 h-36 border-2 border-dashed border-primary/60 rounded-lg p-3 hover:border-primary cursor-pointer transition-all flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm shadow-sm"
           >
-            <FileText className="h-6 w-6" />
-          </Button>
+            <FileText className="h-8 w-8 text-primary mb-2" />
+            <p className="text-sm font-medium text-center">Drop news article here</p>
+            <p className="text-xs text-muted-foreground text-center">or click to upload</p>
+          </div>
         </SheetTrigger>
         <SheetContent className="sm:max-w-md">
           <SheetHeader>
