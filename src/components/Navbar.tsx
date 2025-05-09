@@ -8,6 +8,7 @@ export function Navbar() {
       <div className="container flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link to="/" className="flex items-center space-x-2">
+            <img src="/logo.svg" alt="FakeBuster Logo" className="h-8 w-8" />
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
               Fakebuster
             </span>
