@@ -1,18 +1,23 @@
-import { onAuthStateChanged } from "firebase/auth";
+// AuthWrapper.jsx
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
-import Login from "./Login";
+import { onAuthStateChanged } from "firebase/auth";
+import Login from "./login";
 
 export default function AuthWrapper({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
     });
-    return () => unsub();
+
+    return () => unsubscribe();
   }, []);
 
-  if (!user) return <Login />;
-  return <>{children}</>;
+  if (loading) return <p>Loading...</p>;
+
+  return user ? children : <Login />;
 }
