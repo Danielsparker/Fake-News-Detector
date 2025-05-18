@@ -1,7 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import Login from "./login";
+import Login from "./Login";
 
 type Props = {
   children: ReactNode;
