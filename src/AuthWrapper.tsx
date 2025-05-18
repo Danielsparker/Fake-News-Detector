@@ -1,15 +1,19 @@
-// AuthWrapper.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Login from "./login";
 
-export default function AuthWrapper({ children }) {
-  const [user, setUser] = useState(null);
+type Props = {
+  children: ReactNode;
+};
+
+export default function AuthWrapper({ children }: Props) {
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("👤 Firebase User:", user);
       setUser(user);
       setLoading(false);
     });
@@ -19,5 +23,5 @@ export default function AuthWrapper({ children }) {
 
   if (loading) return <p>Loading...</p>;
 
-  return user ? children : <Login />;
+  return user ? <>{children}</> : <Login />;
 }

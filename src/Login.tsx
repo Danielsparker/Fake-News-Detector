@@ -18,5 +18,6 @@ export default function Login() {
     </button>
   );
 }
+console.log("🔁 Login component loaded");
 
 

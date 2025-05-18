@@ -7,7 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
-import AuthWrapper from "./AuthWrapper";
+import AuthWrapper from "./AuthWrapper"; // ✅ right
+
 
 const queryClient = new QueryClient();
 
