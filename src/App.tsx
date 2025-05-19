@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import AuthWrapper from "./AuthWrapper"; // ✅ right
+import SignIn from "./components/SignIn";
 
 
 const queryClient = new QueryClient();
@@ -17,6 +18,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
+      <SignIn />
       <Sonner />
       <BrowserRouter>
         <AuthWrapper>

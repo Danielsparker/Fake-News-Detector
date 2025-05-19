@@ -2,7 +2,6 @@
 import React from "react";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
-import "../styles/gradient.css"; //
 
 const SignIn: React.FC = () => {
   const handleSignIn = async () => {
