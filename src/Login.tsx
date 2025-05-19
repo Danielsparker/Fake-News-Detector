@@ -13,11 +13,22 @@ export default function Login() {
   };
 
   return (
-    <button onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2 rounded">
-      Sign in with Google
-    </button>
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Welcome to FakeBuster 🔍</h1>
+
+      <button
+        onClick={handleLogin}
+        className="flex items-center gap-3 bg-white text-gray-800 px-6 py-3 border border-gray-300 rounded-lg shadow hover:bg-gray-100 transition"
+      >
+        <img
+          src="https://www.svgrepo.com/show/475656/google-color.svg"
+          alt="Google"
+          className="w-5 h-5"
+        />
+        <span>Sign in with Google</span>
+      </button>
+    </div>
   );
 }
+
 console.log("🔁 Login component loaded");
-
-
