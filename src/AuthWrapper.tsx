@@ -1,7 +1,8 @@
+
 import { useEffect, useState, ReactNode } from "react";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import Login from "./Login";
+import { Navbar } from "./components/Navbar"; // Import Navbar for the direct display
 
 type Props = {
   children: ReactNode;
@@ -23,5 +24,6 @@ export default function AuthWrapper({ children }: Props) {
 
   if (loading) return <p>Loading...</p>;
 
-  return user ? <>{children}</> : <Login />;
+  // Always show the content now, regardless of user status
+  return <>{children}</>;
 }
