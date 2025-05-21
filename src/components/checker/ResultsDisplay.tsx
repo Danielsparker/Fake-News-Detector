@@ -4,7 +4,7 @@ import { TruthScore } from "../TruthScore";
 import { SourcesList } from "../SourcesList";
 import { CheckedContent } from "@/types";
 import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ResultsDisplayProps {
   results: CheckedContent;

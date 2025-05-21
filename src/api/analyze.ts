@@ -3,9 +3,6 @@
 import { OpenAI } from "openai";
 import { fetchNewsArticles, extractKeyTerms } from "./fetchNews";
 import { Source } from "@/types";
-import 'dotenv/config';
-
-
 
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
