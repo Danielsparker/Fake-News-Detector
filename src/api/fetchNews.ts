@@ -26,15 +26,19 @@ export async function fetchNewsArticles(query: string): Promise<NewsArticle[]> {
     const res = await fetch(url);
     
     if (!res.ok) {
-      throw new Error(`News API responded with status: ${res.status}`);
+      console.error(`News API error status: ${res.status}`);
+      return [];
     }
     
     const data = await res.json();
     
     if (data.status === 'error') {
-      throw new Error(data.message || 'Error fetching news');
+      console.error('News API error:', data.message);
+      return [];
     }
     
+    // Log and return results
+    console.log(`Retrieved ${data.articles?.length || 0} articles from News API`);
     return data.articles || [];
   } catch (error) {
     console.error('Error fetching news articles:', error);
@@ -50,5 +54,5 @@ export function extractKeyTerms(claim: string): string {
                            .trim();
   
   // Return the cleaned claim or the original if cleaning removed too much
-  return cleanedClaim.length > 3 ? cleanedClaim : claim;
+  return cleanedClaim.length > 5 ? cleanedClaim : claim;
 }
