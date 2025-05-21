@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TruthScore } from "../TruthScore";
 import { SourcesList } from "../SourcesList";
 import { CheckedContent } from "@/types";
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 interface ResultsDisplayProps {
   results: CheckedContent;
