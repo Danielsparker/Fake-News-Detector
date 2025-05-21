@@ -23,6 +23,7 @@ export default defineConfig({
     sourcemap: true,
   },
   server: {
-    port: 8080
+    port: 3000, // Changed from 8080 to 3000
+    host: true
   }
 });
