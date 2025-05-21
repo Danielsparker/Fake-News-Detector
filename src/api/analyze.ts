@@ -2,23 +2,15 @@
 // File: src/api/analyze.ts
 import { OpenAI } from "openai";
 import { fetchNewsArticles, extractKeyTerms } from "./fetchNews";
+import { Source } from "@/types";
 
 // Initialize OpenAI client
 const openai = new OpenAI({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
 
-export interface NewsSource {
-  title: string;
-  description: string;
-  url: string;
-  publisher?: string;
-  publishedDate?: string;
-  isSupporting?: boolean;
-}
-
 export interface AnalysisResult {
   score: number;
   summary: string;
-  sources: NewsSource[];
+  sources: Source[];
 }
 
 export async function analyzeContent(inputText: string): Promise<AnalysisResult> {
@@ -45,11 +37,11 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
     console.log("NewsData articles:", newsDataArticles.length);
     
     // Combine sources from both APIs
-    let combinedSources: any[] = [];
+    let combinedSources: Source[] = [];
     
     // Add News API sources
     if (newsApiArticles && newsApiArticles.length > 0) {
-      combinedSources = newsApiArticles.map(item => ({
+      const newsApiMapped: Source[] = newsApiArticles.map(item => ({
         title: item.title,
         description: item.description || "",
         url: item.url,
@@ -57,16 +49,17 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
         publishedDate: new Date(item.publishedAt).toLocaleDateString(),
         content: item.content
       }));
+      combinedSources = [...newsApiMapped];
     }
     
     // Add NewsData API sources if needed
     if ((combinedSources.length < 3) && newsDataArticles && newsDataArticles.length > 0) {
-      const newsDataMapped = newsDataArticles.map(item => ({
+      const newsDataMapped: Source[] = newsDataArticles.map(item => ({
         title: item.title,
         description: item.description || "",
         url: item.link,
-        publisher: item.source_id,
-        publishedDate: item.pubDate,
+        publisher: item.source_id || "News Source",
+        publishedDate: item.pubDate || new Date().toLocaleDateString(),
         content: item.content
       }));
       

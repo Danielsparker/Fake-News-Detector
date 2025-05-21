@@ -1,3 +1,4 @@
+
 import { CheckedContent, ContentType, Source, TruthLevel } from "@/types";
 import { analyzeContent as apiAnalyzeContent } from "@/api/analyze";
 
@@ -42,6 +43,9 @@ export async function analyzeContent(content: string, contentType: ContentType):
   // Determine truth level based on score
   const truthLevel = determineTruthLevel(analysisResult.score);
   
+  // Convert sources to ensure they match our Source type
+  const sources: Source[] = analysisResult.sources;
+  
   return {
     id,
     content,
@@ -49,7 +53,7 @@ export async function analyzeContent(content: string, contentType: ContentType):
     truthScore: analysisResult.score,
     truthLevel,
     summary: analysisResult.summary,
-    sources: analysisResult.sources,
+    sources,
     timestamp: new Date()
   };
 }
