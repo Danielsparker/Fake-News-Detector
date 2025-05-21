@@ -19,7 +19,8 @@ export interface Source {
   url: string;
   publisher: string;
   publishedDate?: string;
-  isSupporting: boolean;
+  isSupporting?: boolean;
+  description?: string;
 }
 
 export interface HistoryItem {

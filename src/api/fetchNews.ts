@@ -16,7 +16,11 @@ export interface NewsArticle {
 
 export async function fetchNewsArticles(query: string): Promise<NewsArticle[]> {
   const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&pageSize=10&apiKey=${API_KEY}`;
+  
+  // Add keywords to improve search
+  const enhancedQuery = `${query} facts verification`;
+  
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(enhancedQuery)}&language=en&pageSize=10&sortBy=relevancy&apiKey=${API_KEY}`;
 
   try {
     const res = await fetch(url);
@@ -36,4 +40,15 @@ export async function fetchNewsArticles(query: string): Promise<NewsArticle[]> {
     console.error('Error fetching news articles:', error);
     return [];
   }
+}
+
+// Function to extract key terms from a claim for better searches
+export function extractKeyTerms(claim: string): string {
+  // Remove question marks and common words that don't add search value
+  const cleanedClaim = claim.replace(/\?/g, '')
+                           .replace(/is|the|a|an|has|have|did|do|does|are|am|was|were|will|would|could|should/gi, '')
+                           .trim();
+  
+  // Return the cleaned claim or the original if cleaning removed too much
+  return cleanedClaim.length > 3 ? cleanedClaim : claim;
 }
