@@ -4,8 +4,11 @@ import { OpenAI } from "openai";
 import { fetchNewsArticles, extractKeyTerms } from "./fetchNews";
 import { Source } from "@/types";
 
-// Initialize OpenAI client
-const openai = new OpenAI({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
+// Initialize OpenAI client with the dangerouslyAllowBrowser flag
+const openai = new OpenAI({ 
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true // Add this flag to allow browser usage
+});
 
 export interface AnalysisResult {
   score: number;
