@@ -28,6 +28,7 @@ export function SourcesList({ sources }: SourcesListProps) {
                   <h4 className="font-medium text-base">{source.title}</h4>
                   <p className="text-sm text-muted-foreground mt-1">
                     {source.publisher} {source.publishedDate && `• ${source.publishedDate}`}
+                    {source.aiGenerated && " • AI-suggested"}
                   </p>
                 </div>
                 

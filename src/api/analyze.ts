@@ -1,12 +1,12 @@
 
 import { OpenAI } from "openai";
-import { fetchNewsArticles, extractKeyTerms } from "./fetchNews";
+import { fetchNewsArticles, extractKeyTerms, getKeyEntitiesFromText } from "./fetchNews";
 import { Source } from "@/types";
 
 // Initialize OpenAI client with the dangerouslyAllowBrowser flag
 const openai = new OpenAI({ 
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Add this flag to allow browser usage
+  dangerouslyAllowBrowser: true 
 });
 
 export interface AnalysisResult {
@@ -19,8 +19,8 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
   try {
     console.log("Analyzing content:", inputText);
     
-    // Use both APIs to get more comprehensive results
-    const searchQuery = extractKeyTerms(inputText);
+    // Extract key entities or terms from the input text for better search
+    const searchQuery = getKeyEntitiesFromText(inputText);
     console.log("Search query:", searchQuery);
     
     // 1. Fetch news from News API
@@ -28,15 +28,20 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
     console.log("News API articles:", newsApiArticles.length);
     
     // 2. Fetch news from NewsData API as backup
-    const newsDataRes = await fetch(
-      `https://newsdata.io/api/1/news?apikey=${
-        import.meta.env.VITE_NEWSDATA_API_KEY
-      }&q=${encodeURIComponent(searchQuery)}&language=en&size=5`
-    );
-    
-    const newsDataJson = await newsDataRes.json();
-    const newsDataArticles = newsDataJson.results || [];
-    console.log("NewsData articles:", newsDataArticles.length);
+    let newsDataArticles = [];
+    try {
+      const newsDataRes = await fetch(
+        `https://newsdata.io/api/1/news?apikey=${
+          import.meta.env.VITE_NEWSDATA_API_KEY
+        }&q=${encodeURIComponent(searchQuery)}&language=en&size=5`
+      );
+      
+      const newsDataJson = await newsDataRes.json();
+      newsDataArticles = newsDataJson.results || [];
+      console.log("NewsData articles:", newsDataArticles.length);
+    } catch (error) {
+      console.error("Error fetching from NewsData API:", error);
+    }
     
     // Combine sources from both APIs
     let combinedSources: Source[] = [];
@@ -48,32 +53,75 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
         description: item.description || "No description available",
         url: item.url || "#",
         publisher: item.source?.name || "News Source",
-        publishedDate: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : new Date().toLocaleDateString(),
-        content: item.content || item.description || ""
+        publishedDate: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : undefined,
+        content: item.content || item.description || "",
+        isSupporting: true // Default, will be updated by OpenAI
       }));
       combinedSources = [...newsApiMapped];
     }
     
     // Add NewsData API sources if needed
-    if ((combinedSources.length < 3) && newsDataArticles && newsDataArticles.length > 0) {
+    if (newsDataArticles && newsDataArticles.length > 0) {
       const newsDataMapped: Source[] = newsDataArticles.map(item => ({
         title: item.title || "Untitled Article",
         description: item.description || "No description available",
         url: item.link || "#",
         publisher: item.source_id || "News Source",
-        publishedDate: item.pubDate || new Date().toLocaleDateString(),
-        content: item.content || item.description || ""
+        publishedDate: item.pubDate || undefined,
+        content: item.content || item.description || "",
+        isSupporting: true // Default, will be updated by OpenAI
       }));
       
       combinedSources = [...combinedSources, ...newsDataMapped];
     }
     
-    // Ensure we have at least some placeholder sources if both APIs failed
+    console.log("Combined sources before filtering:", combinedSources.length);
+    
+    // If no sources found, use OpenAI to generate some relevant sources
     if (combinedSources.length === 0) {
-      console.log("No sources found, adding fallback source");
+      console.log("No sources found, asking OpenAI to suggest relevant sources");
+      
+      const sourcesCompletion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert fact checker. The user will provide a news claim. Your task is to provide 3 potential sources that might verify this claim. Format as JSON array."
+          },
+          {
+            role: "user",
+            content: `Generate 3 likely sources for this news: "${inputText}"`
+          }
+        ],
+        temperature: 0.3,
+        response_format: { type: "json_object" }
+      });
+      
+      try {
+        const suggestedSourcesJson = JSON.parse(sourcesCompletion.choices[0].message.content || "{}");
+        const suggestedSources = suggestedSourcesJson.sources || [];
+        
+        if (suggestedSources.length > 0) {
+          combinedSources = suggestedSources.map((source: any, index: number) => ({
+            title: source.title || `Suggested Source ${index + 1}`,
+            description: source.description || "This source was suggested by AI based on the content.",
+            url: source.url || `https://www.google.com/search?q=${encodeURIComponent(inputText)}`,
+            publisher: source.publisher || "AI-suggested Source",
+            publishedDate: new Date().toLocaleDateString(),
+            isSupporting: true,
+            aiGenerated: true
+          }));
+        }
+      } catch (error) {
+        console.error("Error parsing AI-suggested sources:", error);
+      }
+    }
+    
+    // Still no sources? Add a fallback
+    if (combinedSources.length === 0) {
       combinedSources = [{
-        title: "No relevant sources found",
-        description: "Unable to find specific sources for this claim. It may be very recent or niche.",
+        title: "Search for more information",
+        description: "Our system couldn't find specific sources for this claim. It may be very recent or niche.",
         url: "https://www.google.com/search?q=" + encodeURIComponent(inputText),
         publisher: "Search Engine",
         publishedDate: new Date().toLocaleDateString(),
@@ -81,17 +129,20 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
       }];
     }
     
-    // Take top 5 most relevant sources
-    const top5Sources = combinedSources.slice(0, 5);
-    console.log("Top 5 sources:", top5Sources.length);
+    // Deduplicate sources by URL to avoid repeats
+    const uniqueSources: Source[] = [];
+    const urlSet = new Set();
     
-    if (!top5Sources || top5Sources.length === 0) {
-      return {
-        score: 50,
-        summary: "Unable to find relevant news articles to verify this claim. This may be due to the claim being very recent, very old, or niche in nature.",
-        sources: []
-      };
-    }
+    combinedSources.forEach(source => {
+      if (!urlSet.has(source.url)) {
+        urlSet.add(source.url);
+        uniqueSources.push(source);
+      }
+    });
+    
+    // Take top 5 most relevant sources
+    const top5Sources = uniqueSources.slice(0, 5);
+    console.log("Top 5 sources:", top5Sources.length);
     
     // Create a prompt for GPT to analyze the input
     const prompt = `
@@ -104,7 +155,7 @@ Your task:
 1. Rate the claim on a scale from 0-100, where 100 means completely true and 0 means completely false.
 2. Provide a brief analysis of whether the sources support, contradict, or are neutral towards the claim.
 3. For each source, explicitly mark whether it supports (TRUE) or contradicts (FALSE) the claim.
-4. If there aren't enough relevant sources to make a determination, acknowledge that.
+4. If there aren't enough relevant sources to make a determination, acknowledge that but still provide your best analysis.
 
 Format your response as:
 SCORE: [number]
@@ -119,7 +170,7 @@ etc.
     
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3, // Lower temperature for more factual responses
     });
@@ -147,20 +198,14 @@ etc.
       };
     });
 
-    // Ensure all sources have isSupporting property set
-    const finalSources = processedSources.map(source => ({
-      ...source,
-      isSupporting: source.isSupporting !== undefined ? source.isSupporting : true // Default to supporting if not specified
-    }));
-
-    console.log("Final sources:", finalSources.length);
+    console.log("Final sources:", processedSources.length);
     
     return {
       score: score,
       summary: content.replace(/SCORE:.*\n?/i, '')
                     .replace(/SOURCE RATINGS:[\s\S]*/i, '')
                     .trim(),
-      sources: finalSources
+      sources: processedSources
     };
     
   } catch (error) {
