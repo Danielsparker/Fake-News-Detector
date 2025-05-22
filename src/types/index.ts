@@ -21,6 +21,7 @@ export interface Source {
   publishedDate?: string;
   isSupporting?: boolean;
   description?: string;
+  aiGenerated?: boolean;
 }
 
 export interface HistoryItem {
