@@ -1,9 +1,10 @@
 
 import { Source } from "@/types";
 import { fetchAllSources, generateAISources, getDefaultSource, processSources } from "./sources/sourceHandler";
-import { AnalysisResult, analyzeWithAI } from "./analysis/contentAnalyzer";
+import { analyzeWithAI } from "./analysis/contentAnalyzer";
+import type { AnalysisResult } from "./analysis/contentAnalyzer";
 
-export { AnalysisResult } from "./analysis/contentAnalyzer";
+export type { AnalysisResult } from "./analysis/contentAnalyzer";
 
 export async function analyzeContent(inputText: string): Promise<AnalysisResult> {
   try {
