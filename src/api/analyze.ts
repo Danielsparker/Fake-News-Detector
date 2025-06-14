@@ -29,20 +29,35 @@ export async function analyzeContent(inputText: string): Promise<AnalysisResult>
     // Step 5: Analyze content with OpenAI
     return await analyzeWithAI(inputText, processedSources);
     
-  } catch (error) {
+  } catch (error: any) { // Added 'any' to inspect error properties
     console.error("Error analyzing content:", error);
-    // Return fallback data so UI doesn't break
+
+    let summaryMessage = "An error occurred while analyzing the content. Please try again.";
+    let errorSources: Source[] = [{
+      title: "Error Retrieving Analysis",
+      description: "There was an error analyzing the content. Please try again or try with different content.",
+      url: "#",
+      publisher: "System",
+      publishedDate: new Date().toLocaleDateString(),
+      isSupporting: false // Explicitly false for error state
+    }];
+
+    // Check if it's an OpenAI API authentication error
+    if (error && (error.status === 401 || (error.error && error.error.code === 'invalid_api_key'))) {
+      summaryMessage = "OpenAI API Key is invalid or missing. Please check your VITE_OPENAI_API_KEY environment variable in the .env file and ensure it's active.";
+      errorSources[0].title = "OpenAI API Key Error";
+      errorSources[0].description = "Could not connect to OpenAI due to an API key issue. Please verify your key configuration.";
+    } else if (error && error.message) {
+      // General error message reflecting what the system caught
+      summaryMessage = `Analysis failed: ${error.message}. Please check console logs for more details or try again.`;
+      errorSources[0].description = `The system encountered an error: ${error.message}.`;
+    }
+    
     return {
-      score: 50,
-      summary: "An error occurred while analyzing the content. Please try again.",
-      sources: [{
-        title: "Error retrieving sources",
-        description: "There was an error analyzing the content. Please try again or try with different content.",
-        url: "#",
-        publisher: "System",
-        publishedDate: new Date().toLocaleDateString(),
-        isSupporting: false
-      }]
+      score: 0, // Default to 0 for errors to clearly indicate failure
+      summary: summaryMessage,
+      sources: errorSources
     };
   }
 }
+
